@@ -1,0 +1,8 @@
+BookIndex.content:
+  path: '/book/index/{node}'
+  defaults:
+    _controller: '\Drupal\BookIndex\Controller\BookIndexController::content'
+    _title: 'Index'
+  requirements:
+    _permission: 'access content'
+    node: \d+

@@ -1,43 +1,38 @@
 <?php
 
-namespace Drupal\BookIndex\Controller;
+namespace Drupal\bookindex\Controller;
 
-use Drupal\book\BookManagerInterface;
+use Drupal\book\BookExport;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-include_once("sites/all/libraries/simple_html_dom/simple_html_dom.php");
+/**
+ * Load Simple HTML DOM
+ *
+ * TODO: This library should probably be included using composer but it's too
+ * much for now to get all that up and running so do it the old fashioned way.
+ *
+ * get it here: https://simplehtmldom.sourceforge.io/
+ * save it to: sites/all/libraries/simle_html_dom/
+ */
+
+include_once('sites/all/libraries/simple_html_dom/simple_html_dom.php');
 
 
 /**
- * Defines HelloController class.
+ * Defines BookIndexController class.
  */
 class BookIndexController extends ControllerBase {
 
   /**
-   * The node storage.
+   * The book export service.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\book\BookExport
    */
-  protected $nodeStorage;
-
-  /**
-   * The node view builder.
-   *
-   * @var \Drupal\Core\Entity\EntityViewBuilderInterface
-   */
-  protected $viewBuilder;
-
-  /**
-   * The book manager.
-   *
-   * @var \Drupal\book\BookManagerInterface
-   */
-  protected $bookManager;
+  protected $bookExport;
   
   /**
    * The renderer.
@@ -49,17 +44,13 @@ class BookIndexController extends ControllerBase {
   /**
    * Constructs a BookIndexController object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\book\BookManagerInterface $book_manager
-   *   The book manager.
+   * @param \Drupal\book\BookExport $bookExport
+   *   The book export service.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, BookManagerInterface $book_manager, RendererInterface $renderer) {
-    $this->nodeStorage = $entity_type_manager->getStorage('node');
-    $this->viewBuilder = $entity_type_manager->getViewBuilder('node');
-    $this->bookManager = $book_manager;
+  public function __construct(BookExport $bookExport, RendererInterface $renderer) {
+    $this->bookExport = $bookExport;
     $this->renderer = $renderer;
   }
 
@@ -68,15 +59,13 @@ class BookIndexController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager'),
-      $container->get('book.manager'),
+      $container->get('book.export'),
       $container->get('renderer')
     );
   }
-  
-  
+    
   /**
-   * Generates indexes of a book page and its children.
+   * Generates an index of a book page and its children.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The node to export.
@@ -84,149 +73,88 @@ class BookIndexController extends ControllerBase {
    * @return array
    *   Return markup array.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function content(NodeInterface $node) {
-    $content = "Notabook! ";
-    if (isset($node->book)) {
-      $tree = $this->bookManager->bookSubtreeData($node->book);
-            
-      $contents = $this->indexTraverse($tree, [$this, 'indexNodeExport']);
-      
-      $exported_book = [
-        '#theme' => 'book_export_html',
-        '#title' => $node->label(),
-        '#contents' => $contents,
-        '#depth' => $node->book['depth'],
-        '#cache' => [
-          'tags' => $node->getEntityType()->getListCacheTags(),
-        ],
-      ];
-      
-      
-      $contents = new Response($this->renderer->renderRoot($exported_book));
+    if (!isset($node->book)) {
+      return array(
+        '#type' => 'markup',
+        '#markup' => $this->t("Not a book page, so no index will be made."),
+      );
+    }
+  
+    // Grab the contents of the book in HTML form
+    $exported_book = $this->bookExport->bookExportHtml($node);
+    $contents = new Response($this->renderer->renderRoot($exported_book));
      
-
-      $index = $this->getindex($contents, "index");
+    // Filter out the named anchors that should be in the index
+    $index = $this->bookindex_getindex($contents, 'index');
           
-      // calculate number of links to decide where to break off the column, count initials double as these take up two lines
-      $num_items = count($index) * 2;
-      $initials = array_keys($index);
-      foreach ($initials as $i) {
-        $num_items += count($index[$i]);
-      }
-    
-      // create page output
-      $text = "<p>";
-    
-      // start with an # A - Z
-      foreach (array("#","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z") as $initial) {
-        if (array_key_exists($initial, $index)) {
-          $text .= "<strong><a href = \"#" . $initial . "\">" . $initial . "</a></strong> ";
-        }
-        else {
-          $text .= $initial;
-        }
-        if ($initial != "Z") {
-          $text .= " - ";
-        }
-      }
-    
-      $text .= "</p>";
-    
-      $text .= "<table><tr style = \"background: inherit\"><td width = \"50%\" valign = \"top\">";
-    
-      // iterate over $index and print links
-      $item = 0;
-      foreach ($initials as $i) {
-        $terms = array_keys($index[$i]);
-      
-        // Header and named anchor for new cap.
-        $text .= "<a name = \"". $i . "\"></a><p><strong>" . $i . "</strong><br>\n";
-      
-        foreach ($terms as $t) {
-          $text .= "<a href = \"" . $index[$i][$t][1] . "\">" . $index[$i][$t][0] . "</a><br>\n";
-        }
-        $text .= "</p>\n";
-      
-        // new column?
-        $before = $item;
-        $item += count($terms) + 2;
-      
-        if (($before < $num_items/2) and ($item >= $num_items/2)) {
-          $text .= "</td><td width = \"50%\" valign = \"top\">";
-        }
-      }
-    
-      $text .= "</td></tr></table>";
-          
-     $content = $text;
+    // calculate number of links to decide where to break off the column
+    // count initials double as these take up two lines
+    $num_items = count($index) * 2;
+    $initials = array_keys($index);
+    foreach ($initials as $i) {
+      $num_items += count($index[$i]);
     }
     
+    // create page content
+    $content = "<p>\n";
+    
+    // start with an # A - Z
+    foreach (array_merge(['#'], range('A','Z')) as $initial) {
+      if (array_key_exists($initial, $index)) {
+        $content .= "  <strong><a href = '#" . $initial . "'>";
+        $content .= $initial;
+        $content .= "</a></strong>";
+      }
+      else {
+        $content .= "  "  . $initial;
+      }
+      if ($initial != 'Z') {
+        $content .= " - \n";
+      }
+    }
+    
+    $content .= "\n</p>\n";
+    $content .= "<table>\n  <tr style = 'background: inherit'>\n";
+    $content .= "<td width = '50%' valign = 'top'>\n";
+    
+    // iterate over $index and print links
+    $item = 0;
+    foreach ($initials as $i) {
+      $terms = array_keys($index[$i]);
+      
+      // Header and named anchor for new cap.
+      $content .= "      <p>\n";
+      $content .= "<a name = '". $i . "'></a>";
+      $content .= "<strong>" . $i . "</strong><br>\n";
+      
+      foreach ($terms as $t) {
+        $content .= "        <a href = '" . $index[$i][$t][1] . "'>";
+        $content .= $index[$i][$t][0];
+        $content .= "</a><br>\n";
+      }
+      $content .= "      </p>\n";
+    
+      // new column?
+      $before = $item;
+      $item += count($terms) + 2;
+    
+      if (($before < $num_items/2) and ($item >= $num_items/2)) {
+        $content .= "    </td>\n    <td width = '50%' valign = 'top'>\n";
+      }
+    }    
+    $content .= "    </td>\n  </tr>\n</table>\n";
+       
     return array(
       '#type' => 'markup',
       '#markup' => $this->t($content),
     );
   }
-  
-    /**
-   * Traverses the book tree to build printable or exportable output.
-   *
-   * During the traversal, the callback is applied to each node and is called
-   * recursively for each child of the node (in weight, title order).
-   *
-   * @param array $tree
-   *   A subtree of the book menu hierarchy, rooted at the current page.
-   * @param callable $callable
-   *   A callback to be called upon visiting a node in the tree.
-   *
-   * @return string
-   *   The output generated in visiting each node.
-   */
-  protected function indexTraverse(array $tree, $callable) {
-    // If there is no valid callable, use the default callback.
-    $callable = !empty($callable) ? $callable : [$this, 'indexNodeExport'];
-
-    $build = [];
-    foreach ($tree as $data) {
-      // Note- access checking is already performed when building the tree.
-      if ($node = $this->nodeStorage->load($data['link']['nid'])) {
-        $children = $data['below'] ? $this->indexTraverse($data['below'], $callable) : '';
-        $build[] = call_user_func($callable, $node, $children);
-      }
-    }
-
-    return $build;
-  }
-  
-    /**
-   * Generates printer-friendly HTML for a node.
-   *
-   * @param \Drupal\node\NodeInterface $node
-   *   The node that will be output.
-   * @param string $children
-   *   (optional) All the rendered child nodes within the current node. Defaults
-   *   to an empty string.
-   *
-   * @return array
-   *   A render array for the exported HTML of a given node.
-   *
-   * @see \Drupal\book\BookExport::exportTraverse()
-   */
-  protected function indexNodeExport(NodeInterface $node, $children = '') {
-    $build = $this->viewBuilder->view($node, 'print', NULL);
-    unset($build['#theme']);
-    
-    return [
-      '#theme' => 'book_node_export_html',
-      '#content' => $build,
-      '#node' => $node,
-      '#children' => $children,
-    ];
-  }
 
   /**
-   * Retrieves all named anchors from the text and returns an array of the index terms and links
+   * Retrieves all named anchors from the text and returns an array of the
+   * index terms and links
    *
    * @param $content
    *   The content of the book in html form
@@ -242,7 +170,7 @@ class BookIndexController extends ControllerBase {
    *      array of label and link
    */
 
-  function getindex($content, $prefix) {
+  private function bookindex_getindex($content, $prefix) {
     $html = str_get_html($content);
     $anchors_raw = $html->find('a[name]');
     $anchors = array();
@@ -250,33 +178,38 @@ class BookIndexController extends ControllerBase {
     foreach ($anchors_raw as $a) {
       $link = $a->name;
       
-      // these anchors are internal, so look for the nodeid
+      // anchors are for use within a page and have to be made into a full URL
+      // node id can be grabed from the id attribute of the article element
       $p = $a->parent;
       while($p) {
-        if ($p->tag == "article") {
+        if ($p->tag == 'article') {
           $nid = substr($p->id, 5);
           global $base_url;
-          $link = $base_url . "/node/$nid#" . $link;
+          $link = $base_url . '/node/' . $nid . '#' . $link;
           break;
         }
         $p = $p->parent;
       }
       
       
-      // only interested if it's an index anchor. Please note we use links including the URL
-      if (!preg_match("/#" . $prefix . "/", $link)) { continue; }
+      // skip if it's not an index anchor
+      if (!preg_match('/#' . $prefix . '/', $link)) {
+        continue;
+      }
     
       # get the label and initial
-      $label = preg_replace("/.+#" . $prefix . "/" , "", $link);
+      $label = preg_replace('/.+#' . $prefix . '/' , '', $link);
       $initial = strtoupper(substr($label, 0, 1));
-      if (is_numeric($initial)) { $initial = "#"; }
+      if (is_numeric($initial)) {
+        $initial = '#';
+      }
     
       if (isset($anchors[$initial])) {
-        array_push($anchors[$initial], array($label, $link));
+        array_push($anchors[$initial], [$label, $link]);
       }
       else {
-        $anchors[$initial] = array();
-        array_push($anchors[$initial], array($label, $link));
+        $anchors[$initial] = [];
+        array_push($anchors[$initial], [$label, $link]);
       }
     }
   
@@ -286,7 +219,7 @@ class BookIndexController extends ControllerBase {
     foreach ($initials as $i) {
       $terms = array_keys($anchors[$i]);
       foreach ($terms as $t) {
-        usort($anchors[$i], [$this, "cmp_terms"]);
+        usort($anchors[$i], [$this, 'bookindex_cmp_terms']);
       }
     }
     
@@ -307,7 +240,7 @@ class BookIndexController extends ControllerBase {
    *   1 if the first item of $a is (alphabetically) ordered after the first item of $b
    */
  
-  function cmp_terms($a, $b) {
+  private function bookindex_cmp_terms($a, $b) {
     if ($a[0] == $b[0]) { return 0; }
     return ($a[0] < $b[0]) ? -1 : 1;
   }

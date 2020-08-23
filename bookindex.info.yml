@@ -1,0 +1,9 @@
+name: Book Index
+type: module
+description: Add an index to a book
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: Book
+
+dependencies:
+  - book:book

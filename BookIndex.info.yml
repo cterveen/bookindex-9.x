@@ -1,8 +1,0 @@
-name: BookIndex
-type: module
-description: Allows you to make an index from a BookIndex
-core: 8.x
-core_version_requirement: ^8 || ^9
-package: Book
-
-dependencies:

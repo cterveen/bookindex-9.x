@@ -1,0 +1,3 @@
+services:
+  bookindex.index:
+    class: Drupal\bookindex\BookIndex

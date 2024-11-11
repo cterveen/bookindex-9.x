@@ -4,19 +4,21 @@ bookindex-9.x
 
 ## Description
 
-bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will lead to the correct description instantly. The index is also exported to a printable version by bookexport-rtf.
+bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will lead to the correct description instantly. The index is also exported to a printable version by bookexportrtf-9.x.
 
-The project should be considered a alpha version. The project is currently not in use but worked in a test environment. The code is not up to standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
+The project should be considered a alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is not up to standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
 
-Further development is intended.
+The module is under active development.
 
 ## Installation
 
-Download [Simple HTML DOM](https://simplehtmldom.sourceforge.io/) and copy it into /sites/all/libraries/simle_html_dom/
+Download [Simple HTML DOM](https://simplehtmldom.sourceforge.io/) and copy simple_html_dom.php into /libraries/simle_html_dom/
 
 Copy all the files into /modules/bookindex
 
-Enable the module
+Copy book/templates/node-export-html.html.twig to your Theme directory and replace `<article>` by `<article id = "node-{{ node.id }}">`.
+
+Enable the module.
 
 ## Use
 

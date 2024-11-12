@@ -2,7 +2,7 @@ name: Book Index
 type: module
 description: Add an index to a book
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10 || ^11
 package: Book
 
 dependencies:

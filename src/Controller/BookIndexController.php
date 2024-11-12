@@ -100,67 +100,12 @@ class BookIndexController extends ControllerBase {
      
     // Filter out the named anchors that should be in the index
     $index = $this->bookIndex->bookindex_getindex($contents, 'index');
-          
-    // calculate number of links to decide where to break off the column
-    // count initials double as these take up two lines
-    $num_items = count($index) * 2;
-    $initials = array_keys($index);
-    foreach ($initials as $i) {
-      $num_items += count($index[$i]);
-    }
-    
-    // create page content
-    $content = "<p>\n";
-    
-    // start with an # A - Z
-    foreach (array_merge(['#'], range('A','Z')) as $initial) {
-      if (array_key_exists($initial, $index)) {
-        $content .= "  <strong><a href = '#" . $initial . "'>";
-        $content .= $initial;
-        $content .= "</a></strong>";
-      }
-      else {
-        $content .= "  "  . $initial;
-      }
-      if ($initial != 'Z') {
-        $content .= " - \n";
-      }
-    }
-    
-    $content .= "\n</p>\n";
-    $content .= "<table>\n  <tr style = 'background: inherit'>\n";
-    $content .= "<td width = '50%' valign = 'top'>\n";
-    
-    // iterate over $index and print links
-    $item = 0;
-    foreach ($initials as $i) {
-      $terms = array_keys($index[$i]);
-      
-      // Header and named anchor for new cap.
-      $content .= "      <p>\n";
-      $content .= "<a name = '". $i . "'></a>";
-      $content .= "<strong>" . $i . "</strong><br>\n";
-      
-      foreach ($terms as $t) {
-        $content .= "        <a href = '" . $index[$i][$t][1] . "'>";
-        $content .= $index[$i][$t][0];
-        $content .= "</a><br>\n";
-      }
-      $content .= "      </p>\n";
-    
-      // new column?
-      $before = $item;
-      $item += count($terms) + 2;
-    
-      if (($before < $num_items/2) and ($item >= $num_items/2)) {
-        $content .= "    </td>\n    <td width = '50%' valign = 'top'>\n";
-      }
-    }    
-    $content .= "    </td>\n  </tr>\n</table>\n";
-       
+
+    // print the index
     return array(
-      '#type' => 'markup',
-      '#markup' => $this->t($content),
+      '#theme' => 'bookindex-index',
+      '#title' => $this->t('Index'),
+      '#items' => $index,
     );
   }
 }

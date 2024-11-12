@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Default theme implementation for to display a book index.
+ *
+ * Available variables:
+ * - title: The title of the index page
+ * - items: The index as associative array by first character (or # for non-
+ *   alphabet characters) with all index links as their childeren.
+ */
+#}
+
+{# make navigation #}
+
+<nav>
+{% for item in items %}
+  {% if item.items is not empty %}
+    <a href = "#{{ item.initial }}"> {{ item.initial }}</a>
+  {% else %}
+    {{ item.initial }}
+  {% endif %}
+  {% if item.initial is not same as("Z") %}
+     - 
+  {% endif %}
+{% endfor %}
+</nav>
+
+{% for item in items %}
+  {% if item.items is not empty %}
+    <a name = "{{ item.initial }}"></a>
+    <h2>{{ item.initial }}</h2>
+    {% for item2 in item.items %}
+      {{ link(item2.title, item2.url) }}
+    {% endfor %}
+  {% endif %}
+{% endfor %}

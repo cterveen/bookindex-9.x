@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Provides an index for books
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function bookindex_theme($existing, $type, $theme, $path) {
+  return [
+    'bookindex-index' => [
+      'variables' => ['title' => NULL, 'items' => []],
+    ],
+  ];
+}

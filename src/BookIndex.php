@@ -41,7 +41,11 @@ class BookIndex {
     
     foreach ($anchors_raw as $a) {
       $link = $a->name;
-      
+
+      // skip if it's not an index anchor
+      if (!preg_match('/^' . $prefix . '/', $link)) {
+        continue;
+      }
       // anchors are for use within a page and have to be made into a full URL
       // node id can be grabed from the id attribute of the article element
       $p = $a->parent;
@@ -54,13 +58,7 @@ class BookIndex {
         }
         $p = $p->parent;
       }
-      
-      
-      // skip if it's not an index anchor
-      if (!preg_match('/#' . $prefix . '/', $link)) {
-        continue;
-      }
-    
+
       # get the label and initial
       $label = preg_replace('/.+#' . $prefix . '/' , '', $link);
       $initial = strtoupper(substr($label, 0, 1));
@@ -69,14 +67,14 @@ class BookIndex {
       }
     
       if (isset($anchors[$initial])) {
-        array_push($anchors[$initial], [$label, $link]);
+        array_push($anchors[$initial], ["title" => $label, "url" => $link]);
       }
       else {
         $anchors[$initial] = [];
-        array_push($anchors[$initial], [$label, $link]);
+        array_push($anchors[$initial], ["title" => $label, "url" => $link]);
       }
     }
-  
+
     // sort on initial and term
     ksort($anchors);
     $initials = array_keys($anchors);
@@ -86,8 +84,19 @@ class BookIndex {
         usort($anchors[$i], [$this, 'bookindex_cmp_terms']);
       }
     }
-    
-    return $anchors;
+
+    // make it the index
+    $index = [];
+    foreach (array_merge(['#'], range('A','Z')) as $i) {
+      if (array_key_exists($i, $anchors)) {
+        array_push($index, ["initial" => $i, "items" => $anchors[$i]]);
+      }
+      else {
+        array_push($index, ["initial" => $i, "items" => []]);
+      }
+    }
+
+    return $index;
   }
 
   /**
@@ -105,7 +114,7 @@ class BookIndex {
    */
  
   private function bookindex_cmp_terms($a, $b) {
-    if ($a[0] == $b[0]) { return 0; }
-    return ($a[0] < $b[0]) ? -1 : 1;
+    if ($a["title"] == $b["title"]) { return 0; }
+    return ($a["title"] < $b["title"]) ? -1 : 1;
   }
 }

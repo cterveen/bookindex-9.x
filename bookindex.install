@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Check requirements for the Book Index module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function bookexportrtf_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'install' || $phase == 'runtime') {
+    $html_parser_detected = file_exists(DRUPAL_ROOT . '/libraries/simple_html_dom/simple_html_dom.php');
+    if ($html_parser_detected) {
+      $requirements['bookexportrtf_html_parser'] = [
+        'title' => t('Book Export RTF'),
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+    else  {
+      $requirements['bookexportrtf_html_parser'] = [
+        'title' => t('Book Export RTF'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('Before you can use the Book Index module, you need to download Simple HTML DOM and copy simple_html_dom.php to /libraries/simple_html_dom/. <a href=":plugin_url">Get Simple HTML DOM here</a>.', [':plugin_url' => 'https://simplehtmldom.sourceforge.io/']),
+      ];
+    }
+
+  return $requirements;
+}

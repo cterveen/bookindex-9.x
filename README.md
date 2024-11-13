@@ -4,9 +4,9 @@ bookindex-9.x
 
 ## Description
 
-bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will lead to the correct description instantly. The index is also exported to a printable version by bookexportrtf-9.x.
+bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will lead to the correct description instantly.
 
-The project should be considered a alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is not up to standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
+The project should be considered an alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is not up to standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
 
 The module is under active development.
 
@@ -24,7 +24,15 @@ Enable the module.
 
 Add terms into your book pages by adding an anchor in the book page with the name index\[Keyword].
 
-The index is shown for the book page and subpages on the url /book/index/\[node].
+The index can be added to a book page as a block, for example in the sidebar or on a separate book page. The block will contain all items of the book. To add it as a separate book page the follow these steps:
+
+1. Add a page to the book titled index, but leave the content blank.
+2. Add the block "Book index block" to the content section below Title
+3. Restrict the block to the title page
+
+The index is now in the books table of content and the navigation links for the book are shown below the index.
+
+It is also possible to show the index on its own page with the url /book/index/\[node]. The page will show all the items in the page and its subpages. The page is not in the book table of contents and the navigational links are not shown.
 
 ## Credits
 

@@ -24,15 +24,24 @@ Enable the module.
 
 Add terms into your book pages by adding an anchor in the book page with the name index\[Keyword].
 
-The index can be added to a book page as a block, for example in the sidebar or on a separate book page. The block will contain all items of the book. To add it as a separate book page the follow these steps:
+The index can be added to a book page as a block, for example in the sidebar or on a separate book page. The block will contain all items of the book. To add it as a separate book page follow these steps:
 
-1. Add a page to the book titled index, but leave the content blank.
-2. Add the block "Book index block" to the content section below Title
-3. Restrict the block to the title page
+1. Add a page to the end of the book titled Index, but leave the content blank.
+2. Add the block "Book index block" to the content section below Title.
+3. Restrict the block to the index page.
 
 The index is now in the books table of content and the navigation links for the book are shown below the index.
 
 It is also possible to show the index on its own page with the url /book/index/\[node]. The page will show all the items in the page and its subpages. The page is not in the book table of contents and the navigational links are not shown.
+
+## Styling
+
+To change the style of the index the following classes are available:
+
+- `.bookindex` - a wrapper for the whole index.
+- `.bookindex--navigation` - the navigation bar.
+- `.bookindex--index` - a wrapper for the index itself.
+- `.bookindex--index-item` - an item within the index: the initial and associated terms.
 
 ## Credits
 

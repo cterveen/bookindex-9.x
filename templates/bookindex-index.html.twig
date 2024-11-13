@@ -10,27 +10,48 @@
  */
 #}
 
-{# make navigation #}
-
-<nav>
-{% for item in items %}
-  {% if item.items is not empty %}
-    <a href = "#{{ item.initial }}"> {{ item.initial }}</a>
-  {% else %}
-    {{ item.initial }}
-  {% endif %}
-  {% if item.initial is not same as("Z") %}
-     - 
-  {% endif %}
-{% endfor %}
-</nav>
-
-{% for item in items %}
-  {% if item.items is not empty %}
-    <a name = "{{ item.initial }}"></a>
-    <h2>{{ item.initial }}</h2>
-    {% for item2 in item.items %}
-      {{ link(item2.title, item2.url) }}
+<div class="bookindex">
+  {#
+  /**
+   * Internal navigation
+   *
+   * A navigation bar with internal page links to the initials
+   */
+  #}
+  <nav class = "bookindex--navigation">
+    {% for item in items %}
+      {% if item.items is not empty %}
+        <a href = "#{{ item.initial }}"> {{ item.initial }}</a>
+      {% else %}
+        {{ item.initial }}
+      {% endif %}
+      {% if item.initial is not same as("Z") %}
+         - 
+      {% endif %}
     {% endfor %}
-  {% endif %}
-{% endfor %}
+  </nav>
+
+  {#
+  /**
+   * The index
+   *
+   * An alphabetisized index with the links to the each item.
+   */
+  #}
+
+  <nav  class="bookindex--index">
+    {% for initial in items %}
+      {% if initial.items is not empty %}
+        <section>
+          <div class = "bookindex--index-item">
+            <a name = "{{ initial.initial }}"></a>
+            <h2>{{ initial.initial }}</h2>
+            {% for item in initial.items %}
+              {{ link(item.title, item.url) }}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    {% endfor %}
+  </nav>
+</div>

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Provides the controller for BookIndex.
+ */
+
 namespace Drupal\bookindex\Controller;
 
 use Drupal\book\BookExport;
@@ -9,19 +14,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
-
-/**
- * Load Simple HTML DOM
- *
- * TODO: This library should probably be included using composer but it's too
- * much for now to get all that up and running so do it the old fashioned way.
- *
- * get it here: https://simplehtmldom.sourceforge.io/
- * save it to: sites/all/libraries/simle_html_dom/
- */
-
-include_once('sites/all/libraries/simple_html_dom/simple_html_dom.php');
-
 
 /**
  * Defines BookIndexController class.
@@ -42,15 +34,14 @@ class BookIndexController extends ControllerBase {
    */
   protected $renderer;
 
-  /** The indexer
+  /** The indexer.
    *
    * @var \Drupal\bookindex\BookIndex
    */
-
   protected $bookIndex;
 
   /**
-   * Constructs a BookIndexController object.
+   * Constructs the BookIndexController object.
    *
    * @param \Drupal\book\BookExport $bookExport
    *   The book export service.
@@ -59,10 +50,10 @@ class BookIndexController extends ControllerBase {
    * @param \Drupal\bookindex\Bookindex $bookIndex
    *   The book converter.
    */
-  public function __construct(BookExport $bookExport, RendererInterface $renderer, BookIndex $bookIndex) {
-    $this->bookExport = $bookExport;
+  public function __construct(BookExport $book_export, RendererInterface $renderer, BookIndex $book_index) {
+    $this->bookExport = $book_export;
     $this->renderer = $renderer;
-    $this->bookIndex = $bookIndex;
+    $this->bookIndex = $book_index;
   }
 
    /**
@@ -90,22 +81,23 @@ class BookIndexController extends ControllerBase {
     if (!isset($node->book)) {
       return array(
         '#type' => 'markup',
-        '#markup' => $this->t("Not a book page, so no index will be made."),
+        '#markup' => $this->t('Not a book page, so no index will be made.'),
       );
     }
   
-    // Grab the contents of the book in HTML form
+    // Grab the contents of the book in HTML form.
     $exported_book = $this->bookExport->bookExportHtml($node);
     $contents = new Response($this->renderer->renderRoot($exported_book));
      
-    // Filter out the named anchors that should be in the index
+    // Filter out the named anchors that should be in the index.
     $index = $this->bookIndex->bookindex_getindex($contents, 'index');
 
-    // print the index
+    // Print the index.
     return array(
       '#theme' => 'bookindex-index',
       '#title' => $this->t('Index'),
       '#items' => $index,
     );
   }
+
 }

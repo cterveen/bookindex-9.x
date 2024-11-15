@@ -1,19 +1,24 @@
 <?php
 
+/**
+ * @file
+ * Provides a 'Book Index' block.
+ */
+
 namespace Drupal\bookindex\Plugin\Block;
 
 use Drupal\book\BookExport;
+use Drupal\book\BookManagerInterface;
 use Drupal\bookindex\BookIndex;
 use Drupal\Core\Block\BlockBase;
-use Drupal\book\BookManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Drupal\node\Entity\Node;
-use Drupal\Core\Render\RendererInterface;
 
 /**
  * Provides a 'BookIndex' block.
@@ -24,6 +29,7 @@ use Drupal\Core\Render\RendererInterface;
  * )
  */
 class BookIndexBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
   /**
    * The book export service.
    *
@@ -38,7 +44,7 @@ class BookIndexBlock extends BlockBase implements ContainerFactoryPluginInterfac
    */
   protected $renderer;
 
-  /** The indexer
+  /** The indexer.
    *
    * @var \Drupal\bookindex\BookIndex
    */
@@ -67,7 +73,7 @@ class BookIndexBlock extends BlockBase implements ContainerFactoryPluginInterfac
   protected $nodeStorage;
 
   /**
-   * Constructs a new BookIndex instance.
+   * Constructs the BookIndexBlock object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -86,15 +92,15 @@ class BookIndexBlock extends BlockBase implements ContainerFactoryPluginInterfac
    * @param \Drupal\Core\Entity\EntityStorageInterface $node_storage
    *   The node storage.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, BookManagerInterface $book_manager, EntityStorageInterface $node_storage, BookExport $bookExport, RendererInterface $renderer, BookIndex $bookIndex) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, BookManagerInterface $book_manager, EntityStorageInterface $node_storage, BookExport $book_export, RendererInterface $renderer, BookIndex $book_index) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->routeMatch = $route_match;
     $this->bookManager = $book_manager;
     $this->nodeStorage = $node_storage;
-    $this->bookExport = $bookExport;
+    $this->bookExport = $book_export;
     $this->renderer = $renderer;
-    $this->bookIndex = $bookIndex;
+    $this->bookIndex = $book_index;
   }
 
   /**
@@ -125,22 +131,23 @@ class BookIndexBlock extends BlockBase implements ContainerFactoryPluginInterfac
    * {@inheritdoc}
    */
   public function build() {
-    // Get the root
+    // Get the root.
     $node = $this->routeMatch->getParameter('node');
     $root = Node::load($node->book['bid']);
 
-    // Grab the contents of the book in HTML form
+    // Grab the contents of the book in HTML form.
     $exported_book = $this->bookExport->bookExportHtml($root);
     $contents = new Response($this->renderer->renderRoot($exported_book));
 
-    // Filter out the named anchors that should be in the index
+    // Filter out the named anchors that should be in the index.
     $index = $this->bookIndex->bookindex_getindex($contents, 'index');
 
-    // print the index
+    // Print the index.
     return array(
       '#theme' => 'bookindex-index',
       '#title' => $this->t('Index'),
       '#items' => $index,
     );
   }
+
 }

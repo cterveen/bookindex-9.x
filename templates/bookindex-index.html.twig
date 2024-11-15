@@ -5,18 +5,20 @@
  *
  * Available variables:
  * - title: The title of the index page
- * - items: The index as associative array by first character (or # for non-
- *   alphabet characters) with all index links as their childeren.
+ * - items: The index as an array of arrays with the following items:
+ *   - initial: the first character of the terms or # if the first character is
+ *     not a letter.
+ *   - items: an array of arrays with the following items:
+ *     - title: the index term
+ *     - url: the full url to the term.
  */
 #}
 
 <div class="bookindex">
   {#
-  /**
-   * Internal navigation
-   *
-   * A navigation bar with internal page links to the initials
-   */
+    Internal navigation
+
+    A navigation bar with internal page links to the initials
   #}
   <nav class = "bookindex--navigation">
     {% for item in items %}
@@ -32,11 +34,9 @@
   </nav>
 
   {#
-  /**
-   * The index
-   *
-   * An alphabetisized index with the links to the each item.
-   */
+   The index
+
+   An alphabetisized index with the links to the each item.
   #}
 
   <nav  class="bookindex--index">

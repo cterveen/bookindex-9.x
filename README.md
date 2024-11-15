@@ -4,9 +4,9 @@ bookindex-9.x
 
 ## Description
 
-bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will lead to the correct description instantly.
+bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will directly lead to the correct description.
 
-The project should be considered an alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is not up to standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
+The project should be considered an alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is up to the Drupal standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
 
 The module is under active development.
 

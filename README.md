@@ -4,11 +4,11 @@ bookindex-9.x
 
 ## Description
 
-bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will directly lead to the correct description.
+bookindex-9.x is a Drupal 9 module that adds index functionality to Drupal books. Although search functions can be useful to find certain items an index will directly lead to the correct description. This module enables the addition of index terms to book pages as named anchors and to show the index in a block or on a separate page.
 
-The project should be considered an alpha version. The project is currently not in use but worked in a Drupal 9.x and 11.x test environment. The code is up to the Drupal standard. No help page or options are available. Internationalisation and localisation is not available. The module is not in the Drupal module repository.
+The base language of the module is English. Internationalisation is not available by default but is available within Drupal. Localisation is not applicable. The style of the index can be configured using CSS. A help text is available. Options are not available. The module is not in the Drupal module repository.
 
-The module is under active development.
+The project should be considered beta. The project is not in use but worked in a Drupal 9.x and 11.x (with Book 1.x) test environment. The code has been updated to the Drupal standard. Testing is not available. The module is under active maintenance.
 
 ## Installation
 
@@ -22,7 +22,7 @@ Enable the module.
 
 ## Use
 
-Add terms into your book pages by adding an anchor in the book page with the name index\[Keyword].
+Add terms into your book pages by adding an anchor in the book page with the name index\[Keyword]. For example, ````<a name="indexExample"></a>```` will add the term _Example_ to the index.
 
 The index can be added to a book page as a block, for example in the sidebar or on a separate book page. The block will contain all items of the book. To add it as a separate book page follow these steps:
 

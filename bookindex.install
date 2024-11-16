@@ -8,7 +8,7 @@
 /**
  * Implements hook_requirements().
  */
-function bookexportrtf_requirements($phase) {
+function bookindex_requirements($phase) {
   $requirements = [];
 
   if ($phase == 'install' || $phase == 'runtime') {
@@ -26,6 +26,7 @@ function bookexportrtf_requirements($phase) {
         'description' => t('Before you can use the Book Index module, you need to download Simple HTML DOM and copy simple_html_dom.php to /libraries/simple_html_dom/. <a href=":plugin_url">Get Simple HTML DOM here</a>.', [':plugin_url' => 'https://simplehtmldom.sourceforge.io/']),
       ];
     }
+  }
 
   return $requirements;
 }

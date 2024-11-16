@@ -5,6 +5,34 @@
  * Provides an index for books.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function bookindex_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.bookindex':
+      $output = '<h2>' . t('About') . '</h2>';
+      $output .= '<p>' . t('The Book Index module adds index functionality to <i>Books</i>. Index terms are added as named anchors and can be displayed in a block or on separate page.') . '</p>';
+      $output .= '<h2>' . t('Uses') . '</h2>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Installation') . '</dt>';
+      $output .= '<dd>' . t('The dependencies for the Book Index module are the <a href=":book">Book module</a> and <a href=":simple_html_dom">Simple HTML DOM</a>. Installation instructions for Simple HTML DOM are available during the installation process.', [':book' => 'https://www.drupal.org/project/book', ':simple_html_dom' => 'https://simplehtmldom.sourceforge.io/']) . '</dd>';
+      $output .= '<dd>' . t('The Book Index module needs to recover the URL of the page the term is on. The module will construct the URL from the id of the article tag, but the node-id is not in there by default so you have to add it in your theme. Copy the template book/templates/node-export-html.html.twig from the <a href=":book">Book module</a> to your Theme directory and replace <code>&lt;article&gt;</code> with <code>&lt;article id = "node-{{ node.id }}"&gt;</code>.', [':book' => 'https://www.drupal.org/project/book']) . '</dd>';
+      $output .= '<dt>' . t('Adding terms to the index') . '</dt>';
+      $output .= '<dd>' . t('To add a term to the book make a named anchor with the name <i>index[Term]</i> to the book. For example, <code>&lt;a name="indexExample"&gt;&lt;/a&gt;</code> will add the term <i>Example</i> to the index.') . '</dd>';
+      $output .= '<dt>' . t('Showing the index in a block') . '</dt>';
+      $output .= '<dd>' . t('The index can be added to a book page as a block, for example in the sidebar or on a separate book page. The block will contain all terms in the book. To add it as a separate book page follow these steps: 1) Add a page to the end of the book titled "Index", but leave the content blank. 2) Add the block <i>Book index block</i> to the content section below <i>Title</i>. 3) Restrict the block to the new page.') . '</dd>';
+      $output .= '<dt>' . t('Link to the index page') . '</dt>';
+      $output .= '<dd>' . t('It is also possible to show the index on its own page with the url <i>/book/index/[node-id]</i>. The page will show all the terms in the page and its subpages, the node-id of the first book page is used to show a complete index.') . '</dd>';
+      $output .= '</dl>';
+
+      return $output;
+    default:
+  }
+}
+
 /**
  * Implements hook_theme().
  */
